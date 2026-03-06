@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Capacity Wizard</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <h1>Capacity Wizard</h1>
+    <div class="toolbar">
+      <label for="processSelect">Proceso activo</label>
+      <select id="processSelect"></select>
+      <button id="newProcessBtn" type="button">Nuevo proceso</button>
+      <button id="duplicateProcessBtn" type="button">Duplicar proceso</button>
+      <button id="deleteProcessBtn" type="button" class="danger">Eliminar proceso</button>
+      <button id="importExcelBtn" type="button">Importar Excel (.xlsx)</button>
+      <button id="exportJsonBtn" type="button">Exportar JSON</button>
+      <button id="importJsonBtn" type="button">Importar JSON</button>
+      <input id="excelFileInput" type="file" accept=".xlsx,.xls" hidden />
+      <input id="jsonFileInput" type="file" accept="application/json,.json" hidden />
+    </div>
+  </header>
+
+  <main>
+    <section id="alerts"></section>
+
+    <nav class="wizard-tabs" aria-label="Pasos del wizard">
+      <button class="tab-btn active" data-step="0">1) Datos base</button>
+      <button class="tab-btn" data-step="1">2) Técnicos</button>
+      <button class="tab-btn" data-step="2">3) Equipos</button>
+      <button class="tab-btn" data-step="3">4) Tareas</button>
+      <button class="tab-btn" data-step="4">5) Resultados</button>
+    </nav>
+
+    <section class="wizard-step active" data-step="0">
+      <h2>Datos base</h2>
+      <p class="help">Introduce valores clave. Puedes editar manualmente o importar desde Excel.</p>
+      <div class="base-grid">
+        <label>Nombre del proceso
+          <input id="baseProcessName" type="text" placeholder="Process A" />
+        </label>
+        <label>Unidades por día (demanda)
+          <input id="baseUnits" type="number" step="any" min="0" placeholder="Ej. 120" />
+        </label>
+        <label>Demanda (alias)
+          <input id="baseDemand" type="number" step="any" min="0" placeholder="Opcional" />
+        </label>
+        <label>Units per day (alias)
+          <input id="baseUnitsPerDay" type="number" step="any" min="0" placeholder="Opcional" />
+        </label>
+      </div>
+      <details>
+        <summary>Campos base adicionales</summary>
+        <textarea id="baseExtraJson" rows="8" placeholder='{"planta":"Quito","linea":"L1"}'></textarea>
+      </details>
+    </section>
+
+    <section class="wizard-step" data-step="1">
+      <h2>Técnicos</h2>
+      <div class="table-actions"><button id="addTechnicianRow" type="button">+ Añadir fila</button></div>
+      <div class="table-wrapper"><table id="techniciansTable"></table></div>
+    </section>
+
+    <section class="wizard-step" data-step="2">
+      <h2>Equipos</h2>
+      <div class="table-actions"><button id="addEquipmentRow" type="button">+ Añadir fila</button></div>
+      <div class="table-wrapper"><table id="equipmentTable"></table></div>
+    </section>
+
+    <section class="wizard-step" data-step="3">
+      <h2>Tareas</h2>
+      <div class="table-actions"><button id="addTaskRow" type="button">+ Añadir fila</button></div>
+      <div class="table-wrapper"><table id="tasksTable"></table></div>
+    </section>
+
+    <section class="wizard-step" data-step="4">
+      <h2>Resultados</h2>
+      <div class="result-actions">
+        <button id="calculateBtn" type="button" class="primary">Calcular</button>
+      </div>
+      <div id="resultCards" class="cards"></div>
+      <h3>Recursos</h3>
+      <div class="table-wrapper"><table id="resourcesResultTable"></table></div>
+      <h3>Tareas</h3>
+      <div class="table-wrapper"><table id="tasksResultTable"></table></div>
+    </section>
+
+    <div class="wizard-nav">
+      <button id="prevStepBtn" type="button">Anterior</button>
+      <button id="nextStepBtn" type="button">Siguiente</button>
+    </div>
+  </main>
+
+  <template id="alertTemplate">
+    <div class="alert"><span class="alert-text"></span><button type="button" class="close-alert">×</button></div>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
