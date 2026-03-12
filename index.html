@@ -1,102 +1,100 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Capacity Wizard</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capacidad Técnica de Ensayos - Laboratorio</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header class="topbar">
-    <h1>Capacity Wizard</h1>
-    <div class="toolbar">
-      <label for="processSelect">Proceso activo</label>
-      <select id="processSelect"></select>
-      <button id="newProcessBtn" type="button">Nuevo proceso</button>
-      <button id="duplicateProcessBtn" type="button">Duplicar proceso</button>
-      <button id="deleteProcessBtn" type="button" class="danger">Eliminar proceso</button>
-      <button id="importExcelBtn" type="button">Importar Excel (.xlsx)</button>
-      <button id="exportJsonBtn" type="button">Exportar JSON</button>
-      <button id="importJsonBtn" type="button">Importar JSON</button>
-      <input id="excelFileInput" type="file" accept=".xlsx,.xls" hidden />
-      <input id="jsonFileInput" type="file" accept="application/json,.json" hidden />
+  <header class="encabezado">
+    <h1>Calculadora de Capacidad Técnica de Producción</h1>
+    <p>Herramienta operativa para estimar capacidad diaria, detectar cuellos de botella y evaluar cumplimiento de demanda.</p>
+    <div class="acciones-globales">
+      <button id="btnGuardar">Guardar</button>
+      <button id="btnCargarEjemplo">Cargar ejemplo</button>
+      <button id="btnLimpiar" class="peligro">Limpiar</button>
+      <button id="btnExportar">Exportar JSON</button>
+      <button id="btnImportar">Importar JSON</button>
+      <input id="inputImportar" type="file" accept="application/json,.json" hidden>
     </div>
   </header>
 
   <main>
-    <section id="alerts"></section>
-
-    <nav class="wizard-tabs" aria-label="Pasos del wizard">
-      <button class="tab-btn active" data-step="0">1) Datos base</button>
-      <button class="tab-btn" data-step="1">2) Técnicos</button>
-      <button class="tab-btn" data-step="2">3) Equipos</button>
-      <button class="tab-btn" data-step="3">4) Tareas</button>
-      <button class="tab-btn" data-step="4">5) Resultados</button>
+    <nav class="tabs" aria-label="Secciones de la aplicación">
+      <button class="tab activa" data-tab="pnt">1) Datos del PNT</button>
+      <button class="tab" data-tab="tecnicos">2) Técnicos</button>
+      <button class="tab" data-tab="equipos">3) Equipos</button>
+      <button class="tab" data-tab="tareas">4) Tareas del proceso</button>
+      <button class="tab" data-tab="resultados">5) Resultados / cuello de botella</button>
     </nav>
 
-    <section class="wizard-step active" data-step="0">
-      <h2>Datos base</h2>
-      <p class="help">Introduce valores clave. Puedes editar manualmente o importar desde Excel.</p>
-      <div class="base-grid">
-        <label>Nombre del proceso
-          <input id="baseProcessName" type="text" placeholder="Process A" />
-        </label>
-        <label>Unidades por día (demanda)
-          <input id="baseUnits" type="number" step="any" min="0" placeholder="Ej. 120" />
-        </label>
-        <label>Demanda (alias)
-          <input id="baseDemand" type="number" step="any" min="0" placeholder="Opcional" />
-        </label>
-        <label>Units per day (alias)
-          <input id="baseUnitsPerDay" type="number" step="any" min="0" placeholder="Opcional" />
-        </label>
+    <section id="alertas"></section>
+
+    <section id="tab-pnt" class="panel activo">
+      <h2>Datos generales del estudio / PNT</h2>
+      <p class="ayuda">Define los datos generales del ensayo y los parámetros globales por defecto para técnicos y equipos.</p>
+      <div class="grid-form">
+        <label>Nombre del Ensayo <input id="nombreEnsayo" type="text" placeholder="Ej: PCR Respiratorio"></label>
+        <label>PNT AGQ <input id="pntAgq" type="text" placeholder="Ej: AGQ-PNT-045"></label>
+        <label>Muestras necesarias de producir al día <input id="demandaDiaria" type="number" min="0" step="any"></label>
+        <label>Turnos disponibles en el día <input id="turnosDia" type="number" min="0" step="1"></label>
+        <label>Días laborables a la semana <input id="diasSemana" type="number" min="1" step="1"></label>
+        <label>% eficiencia / mermas estándar <input id="mermas" type="text" placeholder="85 o 0.85"></label>
+        <label>Objetivo TAT (días u horas) <input id="objetivoTat" type="text" placeholder="24h o 2 días"></label>
       </div>
-      <details>
-        <summary>Campos base adicionales</summary>
-        <textarea id="baseExtraJson" rows="8" placeholder='{"planta":"Quito","linea":"L1"}'></textarea>
-      </details>
+
+      <h3>Parámetros globales (valores por defecto)</h3>
+      <div class="grid-form">
+        <label>Horas por turno global <input id="horasTurnoGlobal" type="number" min="0" step="any"></label>
+        <label>Dedicación global al ensayo (%) <input id="dedicacionGlobal" type="text" placeholder="70 o 0.70"></label>
+        <label>Eficiencia global personal (%) <input id="eficienciaGlobalPersonal" type="text" placeholder="85 o 0.85"></label>
+        <label>Eficiencia global equipo (%) <input id="eficienciaGlobalEquipo" type="text" placeholder="90 o 0.9"></label>
+        <label>Tamaño batch por defecto <input id="tamanoBatch" type="number" min="1" step="1"></label>
+      </div>
     </section>
 
-    <section class="wizard-step" data-step="1">
+    <section id="tab-tecnicos" class="panel">
       <h2>Técnicos</h2>
-      <div class="table-actions"><button id="addTechnicianRow" type="button">+ Añadir fila</button></div>
-      <div class="table-wrapper"><table id="techniciansTable"></table></div>
+      <p class="ayuda">Añade el personal y su disponibilidad. Los porcentajes aceptan formato 85 o 0.85.</p>
+      <button id="addTecnico">Añadir fila técnico</button>
+      <div class="tabla-contenedor"><table id="tablaTecnicos"></table></div>
+      <h3>Resumen de capacidad por técnico</h3>
+      <div class="tabla-contenedor"><table id="resumenTecnicos"></table></div>
     </section>
 
-    <section class="wizard-step" data-step="2">
+    <section id="tab-equipos" class="panel">
       <h2>Equipos</h2>
-      <div class="table-actions"><button id="addEquipmentRow" type="button">+ Añadir fila</button></div>
-      <div class="table-wrapper"><table id="equipmentTable"></table></div>
+      <p class="ayuda">Añade los equipos y su disponibilidad efectiva para el ensayo.</p>
+      <button id="addEquipo">Añadir fila equipo</button>
+      <div class="tabla-contenedor"><table id="tablaEquipos"></table></div>
+      <h3>Resumen de capacidad por equipo</h3>
+      <div class="tabla-contenedor"><table id="resumenEquipos"></table></div>
     </section>
 
-    <section class="wizard-step" data-step="3">
-      <h2>Tareas</h2>
-      <div class="table-actions"><button id="addTaskRow" type="button">+ Añadir fila</button></div>
-      <div class="table-wrapper"><table id="tasksTable"></table></div>
+    <section id="tab-tareas" class="panel">
+      <h2>Tareas del proceso</h2>
+      <p class="ayuda">Modela cada etapa, su recurso principal y su tiempo por muestra o por batch.</p>
+      <button id="addTarea">Añadir fila tarea</button>
+      <div class="tabla-contenedor"><table id="tablaTareas"></table></div>
     </section>
 
-    <section class="wizard-step" data-step="4">
-      <h2>Resultados</h2>
-      <div class="result-actions">
-        <button id="calculateBtn" type="button" class="primary">Calcular</button>
+    <section id="tab-resultados" class="panel">
+      <h2>Resultados ejecutivos</h2>
+      <p class="ayuda">Vista consolidada de capacidad, cumplimiento de demanda, utilización y cuello de botella.</p>
+      <div id="kpis" class="kpis"></div>
+      <div class="graficos-grid">
+        <article class="card-grafico">
+          <h3>Capacidad por recurso (muestras/día)</h3>
+          <canvas id="graficoCapacidad" width="900" height="300"></canvas>
+        </article>
+        <article class="card-grafico">
+          <h3>Utilización por recurso (%)</h3>
+          <canvas id="graficoUtilizacion" width="900" height="300"></canvas>
+        </article>
       </div>
-      <div id="resultCards" class="cards"></div>
-      <h3>Recursos</h3>
-      <div class="table-wrapper"><table id="resourcesResultTable"></table></div>
-      <h3>Tareas</h3>
-      <div class="table-wrapper"><table id="tasksResultTable"></table></div>
     </section>
-
-    <div class="wizard-nav">
-      <button id="prevStepBtn" type="button">Anterior</button>
-      <button id="nextStepBtn" type="button">Siguiente</button>
-    </div>
   </main>
-
-  <template id="alertTemplate">
-    <div class="alert"><span class="alert-text"></span><button type="button" class="close-alert">×</button></div>
-  </template>
 
   <script src="app.js"></script>
 </body>
